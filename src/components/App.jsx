@@ -1,9 +1,9 @@
 // import { useState, useCallback } from "react";
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
 
-import {actions} from "./redux/contacts/contact-slice";
-import { getContacts } from "./redux/contacts/contact-selector";
-import { setFilter } from "./redux/contacts/contact-selector";
+import {actions} from "../redux/contacts/contact-slice";
+import { getContacts, setFilter } from "../redux/contacts/contact-selector";
+
 
 import ContactList from "./ContactList";
 import ContactForm from "./ContactForm";
