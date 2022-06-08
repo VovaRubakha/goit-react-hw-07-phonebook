@@ -1,40 +1,44 @@
-// import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+
 import { useSelector, shallowEqual, useDispatch } from "react-redux";
-
-import {actions} from "../redux/contacts/contact-slice";
-import { getContacts, setFilter } from "../redux/contacts/contact-selector";
-
 
 import ContactList from "./ContactList";
 import ContactForm from "./ContactForm";
 import Filter from "./Filter";
 
+import {
+  getContacts,
+  getLoading,
+  getError,
+} from "../redux/contacts/contact-selector";
+
+import * as operations from '../redux/contacts/contact-operations'
+
 import styles from './App.module.css'
 
 const App = () => {
-  // const [filter, setFilter] = useState('')
+  const [filter, setFilter] = useState("");
   const contacts = useSelector(getContacts, shallowEqual);
-  const filter = useSelector(setFilter, shallowEqual);
+  const loading = useSelector(getLoading, shallowEqual);
+  const error = useSelector(getError, shallowEqual);
+
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    dispatch(operations.getContacts());
+  }, [dispatch])
+  
+
   const addContact = (data) => {
-    const action = actions.addContact(data);
-    console.log(data);
-    const dublicate = contacts.find(item => item.name === data.name);
-    if(dublicate){
-          alert(`${data.name} is already in contacts list`);
-          return;
-    }
-    dispatch(action)
+    dispatch(operations.addContact(data))
   };
 
   const deleteContact = (id) => {
-    dispatch(actions.deleteContact(id))
+    dispatch(operations.deleteContact(id))
   };
 
-  const changeFilter = ({ target }) => { 
-    dispatch(actions.setFilter(target.value));
-  };
+  const changeFilter = useCallback(({ target }) =>  
+    setFilter(target.value), [setFilter]);
 
   const getFilteredContacts = () => {
     if (!filter) {
@@ -47,13 +51,20 @@ const App = () => {
 
   const filteredContacts = getFilteredContacts();
   return (
-      <div className={styles.container}>
+    <div className={styles.container}>
+      <div>
         <h1>Phonebook</h1>
         <ContactForm onSubmit={addContact} />
+      </div>
+      <div>
         <h2>Contacts</h2>
         <Filter filter={filter} changeFilter={changeFilter} />
-        <ContactList contacts={filteredContacts} deleteContact={deleteContact} />
+        {loading && <p>...Loading</p>}
+        {error && <p>{error.message}</p>}
+        {Boolean(filteredContacts.length) &&
+        <ContactList contacts={filteredContacts} deleteContact={deleteContact} />}
       </div>
+    </div>
   );
 }
 
